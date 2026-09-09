@@ -4,16 +4,18 @@ const env = require("dotenv").config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors("*"));
 app.use(express.json());
-app.use(express.urlencoded());
+// app.use(express.urlencoded());
 
-app.get("/signup", (req, res) => {
-  res.send("hi");
+app.post("/signup", (req, res) => {
+  console.log(req.body);
+  res.send(req.body);
 });
 
-app.get("/login", (req, res) => {
-  res.send("hi");
+app.post("/login", (req, res) => {
+  console.log(req.body);
+  res.send(req.body);
 });
 
 app.listen(3000, () => {
