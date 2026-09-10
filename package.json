@@ -13,12 +13,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/aboodJS/todo-backend/issues"
   },
   "homepage": "https://github.com/aboodJS/todo-backend#readme",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

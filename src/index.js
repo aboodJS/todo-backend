@@ -1,16 +1,18 @@
-const express = require("express");
-const cors = require("cors");
-const env = require("dotenv").config();
+import express, { json, urlencoded } from "express";
+import cors from "cors";
+import "dotenv/config";
+import { sql } from "./db.js";
 
 const app = express();
 
 app.use(cors("*"));
-app.use(express.json());
-app.use(express.urlencoded());
+app.use(json());
+app.use(urlencoded());
 
-app.post("/signup", (req, res) => {
-  console.log(req.body);
-  res.send(req.body);
+app.post("/signup", async (req, res) => {
+  const result = await sql`SELECT version()`;
+  const { version } = result[0];
+  res.send(version);
 });
 
 app.post("/login", (req, res) => {
