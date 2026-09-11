@@ -10,9 +10,12 @@ app.use(json());
 app.use(urlencoded());
 
 app.post("/signup", async (req, res) => {
-  const result = await sql`SELECT version()`;
-  const { version } = result[0];
-  res.send(version);
+  console.log(req.body);
+  const result = await sql`
+      INSERT INTO users (username ,email, password)
+      VALUES (${req.body.username},${req.body.email}, ${req.body.passwd[0]});`;
+  const data = result;
+  res.redirect("http://localhost:5173/");
 });
 
 app.post("/login", (req, res) => {
