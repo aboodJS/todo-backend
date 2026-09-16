@@ -3,6 +3,8 @@ import cors from "cors";
 import "dotenv/config";
 import { sql } from "./db.js";
 
+import bcrypt from "bcrypt";
+
 const app = express();
 
 app.use(cors("*"));
@@ -11,9 +13,20 @@ app.use(urlencoded());
 
 app.post("/signup", async (req, res) => {
   console.log(req.body);
+  const hashedPassword = bcrypt.hashSync(
+    req.body.passwd[0],
+    12,
+    (err, hash) => {
+      if (err) {
+        return err;
+      } else {
+        return hash;
+      }
+    },
+  );
   const result = await sql`
       INSERT INTO users (username ,email, password)
-      VALUES (${req.body.username},${req.body.email}, ${req.body.passwd[0]});`;
+      VALUES (${req.body.username},${req.body.email}, ${hashedPassword});`;
   const data = result;
   res.redirect("http://localhost:5173/");
 });
