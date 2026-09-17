@@ -31,9 +31,23 @@ app.post("/signup", async (req, res) => {
   res.redirect("http://localhost:5173/");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   console.log(req.body);
-  res.send(req.body);
+  const data = await sql`SELECT *
+                        FROM users
+                        WHERE username = ${req.body.username};`;
+  const result = bcrypt.compareSync(
+    req.body.password,
+    data[0].password,
+    (err, rs) => {
+      if (err) {
+        throw err;
+      } else {
+        return rs;
+      }
+    },
+  );
+  res.send(result);
 });
 
 app.listen(3000, () => {
