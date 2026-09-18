@@ -1,13 +1,17 @@
-import { jsonwebtoken as jwt } from "jsonwebtoken";
+import jsonwebtoken from "jsonwebtoken";
 
 function createAuthToken(userData, key) {
-  const token = jwt.sign(userData, key, { expiresIn: "10m" });
+  const token = jsonwebtoken.sign({ username: userData }, key, {
+    expiresIn: "10m",
+  });
   return token;
 }
 
 function createRefreshToken(userData, key) {
-  const token = jwt.sign(userData, key, { expiresIn: "1day" });
+  const token = jsonwebtoken.sign({ username: userData }, key, {
+    expiresIn: "1d",
+  });
   return token;
 }
 
-export default { createAuthToken, createRefreshToken };
+export { createAuthToken, createRefreshToken };

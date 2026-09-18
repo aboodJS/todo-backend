@@ -4,6 +4,7 @@ import "dotenv/config";
 import { sql } from "./db.js";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
+import { createAuthToken, createRefreshToken } from "./tokens.js";
 
 const app = express();
 
@@ -12,8 +13,8 @@ app.use(json());
 app.use(urlencoded());
 app.use(cookieParser());
 
+// signup endpoint
 app.post("/signup", async (req, res) => {
-  console.log(req.body);
   const hashedPassword = bcrypt.hashSync(
     req.body.passwd[0],
     12,
@@ -32,8 +33,8 @@ app.post("/signup", async (req, res) => {
   res.redirect("http://localhost:5173/");
 });
 
+// login endpoint
 app.post("/login", async (req, res) => {
-  console.log(req.body);
   const data = await sql`SELECT *
                         FROM users
                         WHERE username = ${req.body.username};`;
@@ -43,12 +44,24 @@ app.post("/login", async (req, res) => {
     (err, rs) => {
       if (err) {
         return err;
-      } else {
-        return rs;
       }
     },
   );
-  res.send(result);
+
+  const refreshToken = createRefreshToken(
+    data[0].username,
+    process.env.REFRESH_TOKEN_SECRET,
+  );
+
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    path: "/refresh",
+  });
+
+  res.send(createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET));
 });
 
 app.post("/refresh", (req, res) => {
