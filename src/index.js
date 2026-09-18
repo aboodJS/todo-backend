@@ -2,14 +2,15 @@ import express, { json, urlencoded } from "express";
 import cors from "cors";
 import "dotenv/config";
 import { sql } from "./db.js";
-
 import bcrypt from "bcrypt";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 app.use(cors("*"));
 app.use(json());
 app.use(urlencoded());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   console.log(req.body);
@@ -37,17 +38,21 @@ app.post("/login", async (req, res) => {
                         FROM users
                         WHERE username = ${req.body.username};`;
   const result = bcrypt.compareSync(
-    req.body.password,
+    req.body.passwd,
     data[0].password,
     (err, rs) => {
       if (err) {
-        throw err;
+        return err;
       } else {
         return rs;
       }
     },
   );
   res.send(result);
+});
+
+app.post("/refresh", (req, res) => {
+  res.send(req.cookies);
 });
 
 app.listen(3000, () => {
