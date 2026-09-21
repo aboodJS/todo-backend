@@ -5,6 +5,7 @@ import { sql } from "./db.js";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import { createAuthToken, createRefreshToken } from "./tokens.js";
+import checkCookies from "./middleware.js";
 
 const app = express();
 
@@ -33,50 +34,41 @@ app.post("/signup", async (req, res) => {
   res.redirect("http://localhost:5173/");
 });
 
-app.post("/login", (req, res, next) => {
-  console.log(req.cookies);
-  next();
-});
-
 // login endpoint
-app.post(
-  "/login",
-
-  async (req, res) => {
-    const data = await sql`SELECT *
+app.post("/login", checkCookies, async (req, res) => {
+  const data = await sql`SELECT *
                         FROM users
                         WHERE username = ${req.body.username};`;
-    const result = bcrypt.compareSync(
-      req.body.passwd,
-      data[0].password,
-      (err, rs) => {
-        if (err) {
-          return err;
-        } else {
-          return err;
-        }
-      },
+  const result = bcrypt.compareSync(
+    req.body.passwd,
+    data[0].password,
+    (err, rs) => {
+      if (err) {
+        return err;
+      } else {
+        return rs;
+      }
+    },
+  );
+
+  if (result) {
+    const refreshToken = createRefreshToken(
+      data[0].username,
+      process.env.REFRESH_TOKEN_SECRET,
     );
 
-    if (result) {
-      const refreshToken = createRefreshToken(
-        data[0].username,
-        process.env.REFRESH_TOKEN_SECRET,
-      );
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
-      res.cookie("jwt", refreshToken, {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      });
-
-      res.send(
-        createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET),
-      );
-    }
-  },
-);
+    res.send(createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET));
+  } else {
+    res.send(result);
+  }
+});
 
 app.listen(3000, () => {
   console.log(`server running on: ${process.env.SERVER_URI}`);
