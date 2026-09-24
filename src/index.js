@@ -34,8 +34,10 @@ app.post("/signup", async (req, res) => {
   res.redirect("http://localhost:5173/");
 });
 
+app.use("/login", checkCookies);
+
 // login endpoint
-app.post("/login", checkCookies, async (req, res) => {
+app.post("/login", async (req, res) => {
   const data = await sql`SELECT *
                         FROM users
                         WHERE username = ${req.body.username};`;
@@ -64,7 +66,9 @@ app.post("/login", checkCookies, async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.send(createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET));
+    res.send({
+      token: createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET),
+    });
   } else {
     res.send(result);
   }
