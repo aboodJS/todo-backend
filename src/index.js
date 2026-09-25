@@ -9,7 +9,7 @@ import checkCookies from "./middleware.js";
 
 const app = express();
 
-app.use(cors("*"));
+app.use(cors({ credentials: true, origin: [`${process.env.FR_URI}`] }));
 app.use(json());
 app.use(urlencoded());
 app.use(cookieParser());
@@ -41,6 +41,7 @@ app.post("/login", async (req, res) => {
   const data = await sql`SELECT *
                         FROM users
                         WHERE username = ${req.body.username};`;
+
   const result = bcrypt.compareSync(
     req.body.passwd,
     data[0].password,
@@ -64,13 +65,16 @@ app.post("/login", async (req, res) => {
       sameSite: "None",
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
-    res.send({
-      token: createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET),
-    });
+    res.json(
+      JSON.stringify({
+        token: createAuthToken(data[0].username, process.env.AUTH_TOKEN_SECRET),
+      }),
+    );
   } else {
-    res.send(result);
+    res.json(result);
   }
 });
 
