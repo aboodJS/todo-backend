@@ -5,7 +5,7 @@ import { sql } from "./db.js";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import { createAuthToken, createRefreshToken } from "./tokens.js";
-import checkCookies from "./middleware.js";
+import { checkTokens, verifyUser } from "./middleware.js";
 
 const app = express();
 
@@ -76,9 +76,11 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.use("/todos", checkCookies);
+app.use("/todos", checkTokens);
+app.use("/todos", verifyUser);
 
 app.post("/todos", (req, res) => {
+  console.log(req.body);
   res.json({ msg: "hi" });
 });
 
