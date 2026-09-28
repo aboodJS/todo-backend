@@ -81,6 +81,7 @@ app.use("/todos", verifyUser);
 
 app.post("/todos", (req, res) => {
   console.log(req.body);
+
   res.json({ msg: "hi" });
 });
 
