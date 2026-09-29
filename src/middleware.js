@@ -2,7 +2,11 @@ import jsonwebtoken from "jsonwebtoken";
 import { createAuthToken } from "./tokens.js";
 
 export const checkTokens = (req, res, next) => {
-  console.log();
+  console.log(req.headers.authentication);
+  if (req.headers.authentication === undefined) {
+    res.status(403).json({ msg: "please login first" });
+    return 0;
+  }
   jsonwebtoken.verify(
     req.headers.authentication.split(" ")[1],
     process.env.AUTH_TOKEN_SECRET,

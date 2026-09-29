@@ -54,6 +54,10 @@ app.post("/login", async (req, res) => {
   );
 
   if (result) {
+    const authToken = createAuthToken(
+      data[0].id,
+      process.env.AUTH_TOKEN_SECRET,
+    );
     const refreshToken = createRefreshToken(
       data[0].id,
       process.env.REFRESH_TOKEN_SECRET,
@@ -69,7 +73,7 @@ app.post("/login", async (req, res) => {
 
     res.json(
       JSON.stringify({
-        token: createAuthToken(data[0].id, process.env.AUTH_TOKEN_SECRET),
+        token: authToken,
       }),
     );
   } else {
