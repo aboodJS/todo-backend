@@ -2,6 +2,7 @@ import jsonwebtoken from "jsonwebtoken";
 import { createAuthToken } from "./tokens.js";
 
 export const checkTokens = (req, res, next) => {
+  console.log();
   jsonwebtoken.verify(
     req.headers.authentication.split(" ")[1],
     process.env.AUTH_TOKEN_SECRET,
@@ -16,9 +17,10 @@ export const checkTokens = (req, res, next) => {
           process.env.REFRESH_TOKEN_SECRET,
           (err, decoded) => {
             if (err === null) {
-              req.headers.authentication = `Bearer ${createAuthToken(decoded.username, process.env.AUTH_TOKEN_SECRET)}`;
+              req.headers.authentication = `Bearer ${createAuthToken(decoded.id, process.env.AUTH_TOKEN_SECRET)}`;
               next();
             } else {
+              console.log(err);
               res
                 .status(403)
                 .json({ error: "session expired, please Login again" });
