@@ -54,10 +54,6 @@ app.post("/login", async (req, res) => {
   );
 
   if (result) {
-    const authToken = createAuthToken(
-      data[0].id,
-      process.env.AUTH_TOKEN_SECRET,
-    );
     const refreshToken = createRefreshToken(
       data[0].id,
       process.env.REFRESH_TOKEN_SECRET,
@@ -73,7 +69,7 @@ app.post("/login", async (req, res) => {
 
     res.json(
       JSON.stringify({
-        token: authToken,
+        token: createAuthToken(data[0].id, process.env.AUTH_TOKEN_SECRET),
       }),
     );
   } else {
@@ -82,7 +78,6 @@ app.post("/login", async (req, res) => {
 });
 
 app.use("/todos", checkTokens);
-// app.use("/todos", verifyUser);
 
 app.post("/todos", async (req, res) => {
   const userId = jsonwebtoken.decode(
@@ -103,6 +98,27 @@ app.post("/todos", async (req, res) => {
     await sql`INSERT INTO todos (title, description, user_id) VALUES (${req.body.taskTitle}, ${req.body.taskDescription}, ${userId.id});`;
   console.log(query);
   res.status(200).json({ msg: "operation complete" });
+});
+
+app.get("/todos", async (req, res) => {
+  const userId = jsonwebtoken.decode(
+    req.cookies.jwt,
+    process.env.REFRESH_TOKEN_SECRET,
+    (err, decoded) => {
+      if (err === null) {
+        return decoded;
+      } else {
+        console.log(err);
+        return 0;
+      }
+    },
+  );
+  const data = await sql`SELECT * FROM todos WHERE user_id = ${userId.id};`;
+  try {
+    res.status(200).json({ todos: data });
+  } catch (error) {
+    res.send(error);
+  }
 });
 
 app.listen(3000, () => {
