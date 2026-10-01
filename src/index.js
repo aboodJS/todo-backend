@@ -40,7 +40,6 @@ app.post("/login", async (req, res) => {
   const data = await sql`SELECT *
   FROM users
   WHERE username = ${req.body.username};`;
-  console.log(data);
   const result = bcrypt.compareSync(
     req.body.passwd,
     data[0].password,
@@ -53,7 +52,9 @@ app.post("/login", async (req, res) => {
     },
   );
 
-  if (result) {
+  console.log(result);
+
+  if (result === true) {
     const refreshToken = createRefreshToken(
       data[0].id,
       process.env.REFRESH_TOKEN_SECRET,
@@ -69,11 +70,12 @@ app.post("/login", async (req, res) => {
 
     res.json(
       JSON.stringify({
+        loggedin: true,
         token: createAuthToken(data[0].id, process.env.AUTH_TOKEN_SECRET),
       }),
     );
   } else {
-    res.json(result);
+    res.status(403).json({ loggedin: false });
   }
 });
 
@@ -119,6 +121,13 @@ app.get("/todos", async (req, res) => {
   } catch (error) {
     res.send(error);
   }
+});
+
+app.use("/delete_todo", checkTokens);
+
+app.post("/delete_todo", async (req, res) => {
+  const request = await sql`DELETE FROM todos WHERE id = ${req.body.taskId};`;
+  res.json(request);
 });
 
 app.listen(3000, () => {
