@@ -130,6 +130,15 @@ app.post("/delete_todo", async (req, res) => {
   res.json(request);
 });
 
+app.use("/edit_todo", checkTokens);
+
+app.post("/edit_todo", async (req, res) => {
+  console.log(req.body);
+  const request =
+    await sql`SELECT *  FROM todos WHERE id = ${req.body.taskId};`;
+  res.json(request);
+});
+
 app.listen(3000, () => {
   console.log(`server running on: ${process.env.SERVER_URI}`);
 });
