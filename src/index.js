@@ -134,9 +134,14 @@ app.use("/edit_todo", checkTokens);
 
 app.post("/edit_todo", async (req, res) => {
   console.log(req.body);
-  const request =
-    await sql`SELECT *  FROM todos WHERE id = ${req.body.taskId};`;
-  res.json(request);
+  try {
+    const request = await sql`UPDATE todos
+  SET title = 'New Title',
+      description = 'New Description' WHERE id = ${req.body.taskId};`;
+    res.json(request);
+  } catch (error) {
+    res.json(error);
+  }
 });
 
 app.listen(3000, () => {
