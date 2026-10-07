@@ -136,8 +136,8 @@ app.post("/edit_todo", async (req, res) => {
   console.log(req.body);
   try {
     const request = await sql`UPDATE todos
-  SET title = 'New Title',
-      description = 'New Description' WHERE id = ${req.body.taskId};`;
+  SET title = ${req.body.taskTitle},
+      description = ${req.body.taskDesc} WHERE id = ${req.body.taskId};`;
     res.json(request);
   } catch (error) {
     res.json(error);

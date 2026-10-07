@@ -12,7 +12,6 @@ export const checkTokens = (req, res, next) => {
     process.env.AUTH_TOKEN_SECRET,
     (err, decoded) => {
       if (err === null) {
-        console.log(decoded);
         next();
         return 0;
       } else {
@@ -42,7 +41,6 @@ export const verifyUser = (req, res, next) => {
     process.env.AUTH_TOKEN_SECRET,
     (err, decoded) => {
       if (err === null) {
-        console.log(decoded);
         next();
       } else {
         res.status(403).json({ error: "session expired, please Login again" });
