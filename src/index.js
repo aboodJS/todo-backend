@@ -52,8 +52,6 @@ app.post("/login", async (req, res) => {
     },
   );
 
-  console.log(result);
-
   if (result === true) {
     const refreshToken = createRefreshToken(
       data[0].id,
@@ -94,8 +92,7 @@ app.post("/todos", async (req, res) => {
       }
     },
   );
-  console.log(userId);
-  console.log(req.body);
+
   const query =
     await sql`INSERT INTO todos (title, description, user_id) VALUES (${req.body.taskTitle}, ${req.body.taskDescription}, ${userId.id});`;
   console.log(query);
@@ -119,15 +116,19 @@ app.get("/todos", async (req, res) => {
   try {
     res.status(200).json({ todos: data });
   } catch (error) {
-    res.send(error);
+    res.json(error);
   }
 });
 
 app.use("/delete_todo", checkTokens);
 
 app.post("/delete_todo", async (req, res) => {
-  const request = await sql`DELETE FROM todos WHERE id = ${req.body.taskId};`;
-  res.json(request);
+  try {
+    const request = await sql`DELETE FROM todos WHERE id = ${req.body.taskId};`;
+    res.json(request);
+  } catch (error) {
+    res.json(error);
+  }
 });
 
 app.use("/edit_todo", checkTokens);
