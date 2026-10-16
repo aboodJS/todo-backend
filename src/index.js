@@ -17,22 +17,26 @@ app.use(cookieParser());
 
 // signup endpoint
 app.post("/signup", async (req, res) => {
-  const hashedPassword = bcrypt.hashSync(
-    req.body.passwd[0],
-    12,
-    (err, hash) => {
-      if (err) {
-        return err;
-      } else {
-        return hash;
-      }
-    },
-  );
-  const result = await sql`
-      INSERT INTO users (username ,email, password)
-      VALUES (${req.body.username},${req.body.email}, ${hashedPassword});`;
-  const data = result;
-  res.redirect("http://localhost:5173/");
+  try {
+    const hashedPassword = bcrypt.hashSync(
+      req.body.passwd[0],
+      12,
+      (err, hash) => {
+        if (err) {
+          return err;
+        } else {
+          return hash;
+        }
+      },
+    );
+    const result = await sql`
+        INSERT INTO users (username ,email, password)
+        VALUES (${req.body.username},${req.body.email}, ${hashedPassword});`;
+    const data = result;
+    res.redirect("http://localhost:5173/");
+  } catch (error) {
+    res.status(409).json(error);
+  }
 });
 
 // login endpoint
